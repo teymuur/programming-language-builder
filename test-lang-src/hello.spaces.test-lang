@@ -1,0 +1,58 @@
+# This is a sample .spaces.test-lang file
+
+# Variable assignment and input
+print "What's your name?"
+input name
+print "Hello, " + name + "!"
+
+# Basic arithmetic and if-else statement
+x = 10
+y = 5
+if x > y
+    print "x is greater than y"
+    result = x - y
+else
+    print "x is not greater than y"
+    result = y - x
+
+# print "The difference is: " + result
+
+# While loop
+counter = 0
+while counter < 5
+    print "Counter is: " + counter
+    counter = counter + 1
+
+# File operations
+file_write "Hello, this is a test file." to "test_file.txt"
+file_read "test_file.txt" to file_content
+print "File content:"
+print file_content
+
+# More complex if-else with user input
+print "Enter a number:"
+input user_number
+user_number = float(user_number)
+
+if user_number > 0
+    print "The number is positive"
+    if user_number > 10
+        print "And it's greater than 10"
+    else
+        print "But it's not greater than 10"
+else
+    if user_number < 0
+        print "The number is negative"
+    else
+        print "The number is zero"
+
+# Simple calculation in a while loop
+print "Calculating sum of numbers from 1 to 5:"
+sum = 0
+i = 1
+while i <= 5
+    sum = sum + i
+    i = i + 1
+print "Sum: " + sum
+
+print "Program finished!"

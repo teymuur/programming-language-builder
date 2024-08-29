@@ -1,3 +1,1 @@
-*.py
-interpreter.py
-!test_interpreter.py
+*.ignore.*

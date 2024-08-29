@@ -1,12 +1,14 @@
+
 import re
 import sys
 import os
 
-class TestInterpreter:
+class helloInterpreter:
     def __init__(self):
         self.variables = {}
         self.keywords = {
             'if': self.handle_if,
+            'else': self.handle_else,
             'while': self.handle_while,
             'print': self.handle_print,
             'input': self.handle_input,
@@ -75,6 +77,9 @@ class TestInterpreter:
                 while self.peek()[1] != '}':
                     self.parse_statement()
                 self.expect('OP', '}')
+
+    def handle_else(self):
+        self.error("Unexpected 'else' without matching 'if'")
 
     def handle_while(self):
         condition_start = self.current
@@ -183,13 +188,13 @@ if __name__ == '__main__':
 
     filename = sys.argv[1]
     if not filename.endswith('.test-lang'):
-        print("Error: File must have .test-lang extension")
+        print(f"Error: File must have .test-lang extension")
         sys.exit(1)
 
     with open(filename, 'r') as file:
         code = file.read()
 
-    interpreter = TestInterpreter()
+    interpreter = helloInterpreter()
     try:
         interpreter.run(code)
     except SyntaxError as e:
