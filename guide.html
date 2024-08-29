@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Language Interpreter Guide</title>
+    <style>
+
+ 
+        code {
+            background-color: #000000;
+            border: 1px solid #383838;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #1a1a1a;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .note {
+            background-color: #3a3a3a;
+            border-left: 6px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+    <h1>Custom Language Interpreter Guide</h1>
+    
+    <h2>Introduction</h2>
+    <p>This guide will help you set up and use the custom language interpreter. The interpreter can be configured to use either curly braces or spaces for indentation, depending on your preference.</p>
+
+    <h2>Setting Up the Interpreter</h2>
+    <h3>1. Choose Your Syntax Style</h3>
+    <p>Before setting up the interpreter, decide whether you want to use curly braces or spaces for indentation in your custom language.</p>
+
+    <h3>2. Generate the Interpreter Code</h3>
+    <p>Use the provided code generator to create the interpreter code based on your chosen syntax style and custom keywords.</p>
+
+    <h3>3. Save the Interpreter Code</h3>
+    <p>Save the generated interpreter code as a Python file, for example, <code>custom_interpreter.py</code>.</p>
+
+    <h2>Using the Interpreter</h2>
+    <h3>1. Write Your Custom Language Code</h3>
+    <p>Create a new file with the extension you specified (e.g., <code>.mylang</code>) and write your code using your custom language syntax.</p>
+
+    <h3>2. Run the Interpreter</h3>
+    <p>You will need to install Python 3.7 or a higher version to run this interpreter. <a href="https://www.python.org/downloads/"></a></p>
+    <p>Open a terminal or command prompt and run the interpreter with your custom language file as an argument:</p>
+    <pre><code>python custom_interpreter.py your_code_file.mylang</code></pre>
+
+    <h2>Syntax Examples</h2>
+    <h3>Curly Braces Syntax</h3>
+    <pre><code>if (x > 5) {
+    print "x is greater than 5"
+} else {
+    print "x is less than or equal to 5"
+}
+
+while (y < 10) {
+    print y
+    y = y + 1
+}</code></pre>
+
+    <h3>Spaces (Indentation) Syntax</h3>
+    <pre><code>if x > 5
+    print "x is greater than 5"
+else
+    print "x is less than or equal to 5"
+
+while y < 10
+    print y
+    y = y + 1</code></pre>
+
+    <h2>Custom Keywords</h2>
+    <p>Remember to use the custom keywords you defined when generating the interpreter:</p>
+    <ul>
+        <li>If: <code>${ifKeyword}</code></li>
+        <li>Else: <code>${elseKeyword}</code></li>
+        <li>While: <code>${whileKeyword}</code></li>
+        <li>Print: <code>${printKeyword}</code></li>
+        <li>Input: <code>${inputKeyword}</code></li>
+        <li>File Read: <code>${fileReadKeyword}</code></li>
+        <li>File Write: <code>${fileWriteKeyword}</code></li>
+    </ul>
+
+    <h2>Additional Features</h2>
+    <h3>Comments</h3>
+    <p>Use <code>${commentSymbol}</code> to start a comment in your code.</p>
+
+    <h3>File Operations</h3>
+    <p>To read from a file: <code>${fileReadKeyword} "filename.txt" to variable_name</code></p>
+    <p>To write to a file: <code>${fileWriteKeyword} "content" to "filename.txt"</code></p>
+
+    <div class="note">
+        <strong>Note:</strong> Make sure to use the correct syntax (curly braces or indentation) based on how you configured your interpreter.
+    </div>
+
+    <h2>Troubleshooting</h2>
+    <p>If you encounter any issues:</p>
+    <ol>
+        <li>Check that you're using the correct syntax for your chosen style (curly braces or indentation).</li>
+        <li>Verify that you're using the custom keywords you defined.</li>
+        <li>Ensure your custom language file has the correct extension.</li>
+        <li>Check the error messages provided by the interpreter for specific issues in your code.</li>
+    </ol>
+
+    <p>For further assistance or to report bugs, please contact the developer.</p>
+</div>
+</body>
+</html>

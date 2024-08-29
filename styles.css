@@ -3,18 +3,19 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #424242;
 }
 .container {
     max-width: 800px;
     margin: auto;
-    background: white;
+    background: rgb(97, 96, 96);
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    color:white
 }
 h1 {
-    color: #333;
+    color: #ffffff;
 }
 label {
     display: block;
@@ -38,4 +39,21 @@ button {
 }
 button:hover {
     background-color: #45a049;
+}
+
+a{
+    padding: 20px;
+    color:cornflowerblue;
+}
+a:hover{
+    color: darkblue;
+}
+footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background-color: #333;
+    color: #fff;
+    padding: 3px;
+    border-radius: 8px 0 0 0 ;
 }
