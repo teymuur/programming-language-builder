@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Programming Language Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Custom Programming Language Creator</h1>
+        <form id="langForm">
+            <label for="langName">Language Name:</label>
+            <input type="text" id="langName" required>
+
+            <label for="fileExtension">File Extension:</label>
+            <input type="text" id="fileExtension" required>
+
+            <label for="indentation">Indentation Style:</label>
+            <select id="indentation">
+                <option value="spaces">Spaces</option>
+                <option value="tabs">Tabs</option>
+                <option value="braces">Curly Braces</option>
+            </select>
+
+            <label for="commentSymbol">Comment Symbol:</label>
+            <input type="text" id="commentSymbol" placeholder="Default: #">
+
+            <label for="ifKeyword">If Keyword:</label>
+            <input type="text" id="ifKeyword" placeholder="Default: if">
+
+            <label for="elseKeyword">Else Keyword:</label>
+            <input type="text" id="elseKeyword" placeholder="Default: else">
+
+            <label for="whileKeyword">While Keyword:</label>
+            <input type="text" id="whileKeyword" placeholder="Default: while">
+
+            <label for="printKeyword">Print Keyword:</label>
+            <input type="text" id="printKeyword" placeholder="Default: print">
+
+            <label for="forKeyword">For Keyword:</label>
+            <input type="text" id="forKeyword" placeholder="Default: for">
+
+            <label for="inputKeyword">Input Keyword:</label>
+            <input type="text" id="inputKeyword" placeholder="Default: input">
+
+            <label for="fileReadKeyword">File Read Keyword:</label>
+            <input type="text" id="fileReadKeyword" placeholder="Default: file_read">
+
+            <label for="fileWriteKeyword">File Write Keyword:</label>
+            <input type="text" id="fileWriteKeyword" placeholder="Default: file_write">
+
+            <button type="submit">Generate Interpreter</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
