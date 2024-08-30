@@ -1,9 +1,10 @@
 x = 5;
-input x;
-input y;
-if int(x)+int(y) > 3 {
-    print "x is greater than 3";
-} else {
-    print "x is not greater than 3";
+inp x;
+inp y;
+iff int(x)+int(y) > 3 {
+ 
+    write  x+y+"is greater than 3";
+} elsee {
+    write " is not greater than 3";
 }
-print(1+1);
+write(1+1);

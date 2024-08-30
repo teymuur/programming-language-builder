@@ -3,15 +3,15 @@ import re
 import sys
 import os
 
-class helloInterpreter:
+class bracesInterpreter:
     def __init__(self):
         self.variables = {}
         self.keywords = {
-            'if': self.handle_if,
-            'else': self.handle_else,
-            'while': self.handle_while,
-            'print': self.handle_print,
-            'input': self.handle_input,
+            'iff': self.handle_if,
+            'elsee': self.handle_else,
+            'whilee': self.handle_while,
+            'write': self.handle_print,
+            'inp': self.handle_input,
             'file_read': self.handle_file_read,
             'file_write': self.handle_file_write
         }
@@ -31,7 +31,7 @@ class helloInterpreter:
             ('OP',       r'[+\-*/{}()<>=!]'),
             ('STRING',   r'"[^"]*"'),
             ('NEWLINE',  r'\n'),
-            ('COMMENT',  r'#.*'),
+            ('COMMENT',  r'///.*'),
             ('SKIP',     r'[ \t]+'),
             ('MISMATCH', r'.')
         ]
@@ -65,13 +65,13 @@ class helloInterpreter:
             while self.peek()[1] != '}':
                 self.parse_statement()
             self.expect('OP', '}')
-            if self.peek()[1] == 'else':
+            if self.peek()[1] == 'elsee':
                 self.get_next_token()  # Consume 'else'
                 self.expect('OP', '{')
                 self.skip_block()
         else:
             self.skip_block()
-            if self.peek()[1] == 'else':
+            if self.peek()[1] == 'elsee':
                 self.get_next_token()  # Consume 'else'
                 self.expect('OP', '{')
                 while self.peek()[1] != '}':
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     with open(filename, 'r') as file:
         code = file.read()
 
-    interpreter = helloInterpreter()
+    interpreter = bracesInterpreter()
     try:
         interpreter.run(code)
     except SyntaxError as e:

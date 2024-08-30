@@ -1,52 +1,38 @@
 import re
 import sys
-import os
 
 class TestInterpreter:
     def __init__(self):
         self.variables = {}
-        self.keywords = {
-            'if': self.handle_if,
-            'else': self.handle_else,
-            'while': self.handle_while,
-            'print': self.handle_print,
-            'for': self.handle_for,
-            'input': self.handle_input,
-            'file_read': self.handle_file_read,
-            'file_write': self.handle_file_write
-        }
-        self.indentation_level = 0
+        self.program = []
+        self.pc = 0  # Program Counter
 
     def run(self, code):
-        self.lines = code.split('\n')
-        self.current_line = 0
-        while self.current_line < len(self.lines):
-            self.parse_statement(self.lines[self.current_line].strip())
-            self.current_line += 1
+        self.parse(code)
+        while self.pc < len(self.program):
+            try:
+                self.execute(self.program[self.pc])
+                self.pc += 1
+            except IndexError:
+                self.error(f"Unexpected end of program", self.pc)
 
-    def parse_statement(self, line):
-        if not line or line.startswith('#'):
-            return
-        
-        tokens = self.tokenize(line)
-        if not tokens:
-            return
-        if tokens[0][0] == 'ID':
-            if tokens[0][1] in self.keywords:
-                self.keywords[tokens[0][1]](tokens[1:])
-            elif len(tokens) > 1 and tokens[1][1] == '=':
-                self.handle_assignment(tokens)
-            else:
-                self.error(f"Unknown identifier: {tokens[0][1]}")
-        else:
-            self.error(f"Unexpected token: {tokens[0][1]}")
+    def parse(self, code):
+        lines = code.split('\n')
+        self.program = []
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if not stripped or stripped.startswith('#'):
+                continue
+            tokens = self.tokenize(stripped)
+            if tokens:  # Only add non-empty token lists
+                self.program.append((i + 1, tokens))  # Store line number with tokens
 
     def tokenize(self, line):
         token_specification = [
             ('NUMBER',   r'\d+(\.\d*)?'),
             ('ASSIGN',   r'='),
             ('ID',       r'[A-Za-z_]\w*'),
-            ('OP',       r'[+\-*/()<>=!]'),
+            ('OP',       r'[+\-*/()<>=!]+'),
             ('STRING',   r'"[^"]*"'),
             ('SKIP',     r'[ \t]+'),
             ('MISMATCH', r'.')
@@ -54,66 +40,142 @@ class TestInterpreter:
         tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
         return [(m.lastgroup, m.group()) for m in re.finditer(tok_regex, line) if m.lastgroup != 'SKIP']
 
-    def handle_if(self, tokens):
-        condition = self.evaluate(tokens)
-        if condition:
-            self.execute_block()
+    def execute(self, instruction):
+        line_num, tokens = instruction
+        if not tokens:
+            return
+        
+        keyword = tokens[0][1]
+        if keyword == 'if':
+            self.handle_if(tokens[1:], line_num)
+        elif keyword == 'else':
+            self.handle_else(line_num)
+        elif keyword == 'while':
+            self.handle_while(tokens[1:], line_num)
+        elif keyword == 'print':
+            self.handle_print(tokens[1:], line_num)
+        elif keyword == 'input':
+            self.handle_input(tokens[1:], line_num)
+        elif keyword == 'file_write':
+            self.handle_file_write(tokens[1:], line_num)
+        elif keyword == 'file_read':
+            self.handle_file_read(tokens[1:], line_num)
+        elif len(tokens) > 1 and tokens[1][1] == '=':
+            self.handle_assignment(tokens, line_num)
         else:
-            self.skip_block()
-            if self.current_line < len(self.lines) and self.lines[self.current_line].strip().startswith('else'):
-                self.current_line += 1
-                self.execute_block()
+            self.error(f"Unknown statement: {' '.join(t[1] for t in tokens)}", line_num)
 
-    def handle_else(self, tokens):
-        self.execute_block()
+    def handle_if(self, condition, start_line):
+        if self.evaluate_condition(condition, start_line):
+            self.pc += 1  # Move to the next instruction
+        else:
+            # Skip to matching else or end of if block
+            nesting = 1
+            while nesting > 0 and self.pc < len(self.program) - 1:
+                self.pc += 1
+                next_tokens = self.program[self.pc][1]
+                if next_tokens[0][1] == 'if':
+                    nesting += 1
+                elif next_tokens[0][1] == 'else' and nesting == 1:
+                    self.pc += 1  # Move past the else
+                    break
+                elif nesting == 1 and (self.pc == len(self.program) - 1 or self.program[self.pc + 1][1][0][1] in ['else', 'while', 'print', 'input', 'file_write', 'file_read']):
+                    break
+            if nesting > 0:
+                self.error("Unmatched if statement", start_line)
 
-    def handle_while(self, tokens):
-        while_start = self.current_line
-        while self.evaluate(tokens):
-            self.execute_block()
-            self.current_line = while_start
-            if self.current_line >= len(self.lines):
+    def handle_else(self, line_num):
+        # Skip to end of else block
+        nesting = 1
+        while nesting > 0 and self.pc < len(self.program) - 1:
+            self.pc += 1
+            next_tokens = self.program[self.pc][1]
+            if next_tokens[0][1] == 'if':
+                nesting += 1
+            elif nesting == 1 and (self.pc == len(self.program) - 1 or self.program[self.pc + 1][1][0][1] in ['else', 'while', 'print', 'input', 'file_write', 'file_read']):
                 break
 
-    def handle_for(self, tokens):
-        # Placeholder for for loop implementation
-        pass
+    def handle_while(self, condition, start_line):
+        while_start = self.pc
+        while self.evaluate_condition(condition, start_line):
+            # Execute the while block
+            self.pc += 1
+            while self.pc < len(self.program):
+                next_tokens = self.program[self.pc][1]
+                if next_tokens[0][1] == 'while':
+                    break
+                self.execute(self.program[self.pc])
+                self.pc += 1
+            self.pc = while_start  # Go back to re-evaluate the condition
 
-    def handle_print(self, tokens):
-        value = self.evaluate(tokens)
-        print(value)
+        # Skip to end of while block
+        nesting = 1
+        while nesting > 0 and self.pc < len(self.program) - 1:
+            self.pc += 1
+            next_tokens = self.program[self.pc][1]
+            if next_tokens[0][1] == 'while':
+                nesting += 1
+            elif nesting == 1 and (self.pc == len(self.program) - 1 or self.program[self.pc + 1][1][0][1] in ['else', 'while', 'print', 'input', 'file_write', 'file_read']):
+                break
+        if nesting > 0:
+            self.error("Unmatched while statement", start_line)
 
-    def handle_input(self, tokens):
+    def handle_print(self, tokens, line_num):
+        value = self.evaluate(tokens, line_num)
+        print(str(value))
+
+    def handle_input(self, tokens, line_num):
+        if not tokens:
+            self.error("Missing variable name for input", line_num)
         var_name = tokens[0][1]
         self.variables[var_name] = input()
 
-    def handle_file_read(self, tokens):
-        filename = self.evaluate(tokens[:-2])
-        var_name = tokens[-1][1]
-        try:
-            with open(filename, 'r') as file:
-                self.variables[var_name] = file.read()
-        except IOError as e:
-            self.error(f"Error reading file: {e}")
-
-    def handle_file_write(self, tokens):
-        to_index = next((i for i, t in enumerate(tokens) if t[1] == 'to'), -1)
-        if to_index == -1:
-            self.error("Invalid file_write syntax")
-        filename = self.evaluate(tokens[to_index+1:])
-        content = self.evaluate(tokens[:to_index])
-        try:
-            with open(filename, 'w') as file:
-                file.write(str(content))
-        except IOError as e:
-            self.error(f"Error writing to file: {e}")
-
-    def handle_assignment(self, tokens):
+    def handle_assignment(self, tokens, line_num):
+        if len(tokens) < 3:
+            self.error("Invalid assignment statement", line_num)
         var_name = tokens[0][1]
-        value = self.evaluate(tokens[2:])
+        value = self.evaluate(tokens[2:], line_num)
         self.variables[var_name] = value
 
-    def evaluate(self, tokens):
+    def handle_file_write(self, tokens, line_num):
+        if len(tokens) < 4 or tokens[-2][1] != 'to':
+            self.error("Invalid file_write statement", line_num)
+        content = self.evaluate(tokens[:-2], line_num)
+        filename = self.evaluate([tokens[-1]], line_num)
+        with open(filename, 'w') as f:
+            f.write(str(content))
+
+    def handle_file_read(self, tokens, line_num):
+        if len(tokens) != 4 or tokens[2][1] != 'to':
+            self.error("Invalid file_read statement", line_num)
+        filename = self.evaluate([tokens[0]], line_num)
+        var_name = tokens[3][1]
+        with open(filename, 'r') as f:
+            self.variables[var_name] = f.read()
+
+    def evaluate_condition(self, tokens, line_num):
+        if len(tokens) != 3:
+            self.error("Invalid condition", line_num)
+        left = self.evaluate([tokens[0]], line_num)
+        op = tokens[1][1]
+        right = self.evaluate([tokens[2]], line_num)
+        
+        if op == '<':
+            return float(left) < float(right)
+        elif op == '>':
+            return float(left) > float(right)
+        elif op == '<=':
+            return float(left) <= float(right)
+        elif op == '>=':
+            return float(left) >= float(right)
+        elif op == '==':
+            return left == right
+        elif op == '!=':
+            return left != right
+        else:
+            self.error(f"Unknown operator: {op}", line_num)
+
+    def evaluate(self, tokens, line_num):
         if not tokens:
             return None
         if len(tokens) == 1:
@@ -121,42 +183,19 @@ class TestInterpreter:
             if token[0] == 'NUMBER':
                 return float(token[1])
             elif token[0] == 'ID':
-                return self.variables.get(token[1], 0)
+                if token[1] not in self.variables:
+                    self.error(f"Undefined variable: {token[1]}", line_num)
+                return self.variables[token[1]]
             elif token[0] == 'STRING':
                 return token[1][1:-1]  # Remove quotes
         expr = ' '.join(token[1] for token in tokens)
         try:
-            return eval(expr, {"__builtins__": None}, self.variables)
-        except:
-            self.error(f"Invalid expression: {expr}")
+            return eval(expr, {"__builtins__": None, "float": float}, self.variables)
+        except Exception as e:
+            self.error(f"Invalid expression: {expr}. Error: {str(e)}", line_num)
 
-    def execute_block(self):
-        self.indentation_level += 1
-        self.current_line += 1
-        while self.current_line < len(self.lines):
-            line = self.lines[self.current_line].strip()
-            if not line or line.startswith('#'):
-                self.current_line += 1
-                continue
-            if self.get_indentation(self.lines[self.current_line]) == self.indentation_level:
-                self.parse_statement(line)
-                self.current_line += 1
-            else:
-                break
-        self.indentation_level -= 1
-
-    def skip_block(self):
-        self.current_line += 1
-        while self.current_line < len(self.lines):
-            if self.get_indentation(self.lines[self.current_line]) <= self.indentation_level:
-                break
-            self.current_line += 1
-
-    def get_indentation(self, line):
-        return len(line) - len(line.lstrip())
-
-    def error(self, message):
-        raise SyntaxError(f"Line {self.current_line + 1}: {message}")
+    def error(self, message, line_num):
+        raise SyntaxError(f"Line {line_num}: {message}")
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -178,3 +217,4 @@ if __name__ == '__main__':
         print(f"SyntaxError: {e}")
     except Exception as e:
         print(f"Runtime Error: {e}")
+        print(f"Error occurred at line {interpreter.pc + 1}")
